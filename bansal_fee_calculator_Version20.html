@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bansal Classes — Fee Installment Calculator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f4f4f4; color: #1a1a1a; }
+
+  .header {
+    background: #fff;
+    border-bottom: 3px solid #5b0ea6;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .header img { height: 60px; object-fit: contain; }
+
+  .container { max-width: 900px; margin: 16px auto; padding: 0 12px; }
+
+  .card { background: #fff; border-radius: 8px; border: 1px solid #e8e8e8; padding: 16px; margin-bottom: 12px; }
+  .card-title { font-size: 10px; font-weight: 700; color: #5b0ea6; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; border-left: 3px solid #5b0ea6; padding-left: 8px; }
+
+  .field-row { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 10px; }
+  .field-row.three { grid-template-columns: 1fr; }
+  .field-row.two { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 11px; color: #666; font-weight: 600; }
+  .field input, .field select {
+    font-size: 14px; padding: 8px 10px;
+    border: 1px solid #ddd; border-radius: 6px;
+    background: #fff; color: #1a1a1a; width: 100%;
+    font-family: Arial, sans-serif;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: #5b0ea6; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; }
+  .summary-box { background: #f5f0ff; border: 1px solid #d9c7f5; border-radius: 6px; padding: 12px; }
+  .summary-box .s-label { font-size: 9px; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; font-weight: 700; }
+  .summary-box .s-val { font-size: 14px; font-weight: 700; color: #3b0080; }
+  
+  .summary-box.highlight { background: linear-gradient(135deg, #fff4e6 0%, #ffe6cc 100%); border: 2px solid #ff9800; }
+  .summary-box.highlight .s-label { color: #e65100; }
+  .summary-box.highlight .s-val { font-size: 16px; color: #ff6f00; }
+
+  .inst-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .inst-card { border: 1px solid #e0d4f5; border-radius: 6px; padding: 10px; background: #faf7ff; }
+  .inst-card .inst-name { font-size: 10px; font-weight: 700; color: #5b0ea6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .inst-card .inst-note { font-size: 9px; color: #d4a574; background: #fffbf0; padding: 6px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #d4a574; }
+  .inst-card label { font-size: 10px; color: #888; display: block; margin-bottom: 2px; font-weight: 600; }
+  .inst-card input { font-size: 14px; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #1a1a1a; width: 100%; margin-bottom: 6px; font-family: Arial, sans-serif; font-weight: 600; }
+  .inst-card .date-display { font-size: 14px; padding: 8px 10px; color: #1a1a1a; margin-bottom: 6px; font-weight: 600; }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .btn { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; color: #1a1a1a; font-size: 12px; cursor: pointer; font-family: Arial, sans-serif; flex: 1; min-width: 120px; }
+  .btn:hover { background: #f5f5f5; }
+  .btn.primary { background: #5b0ea6; color: #fff; border-color: #5b0ea6; font-weight: 700; }
+  .btn.primary:hover { background: #4a0b88; }
+
+  .footer-note { text-align: center; font-size: 9px; color: #aaa; margin-top: 8px; padding-bottom: 16px; }
+
+  /* TABLET */
+  @media (min-width: 768px) {
+    .header {
+      padding: 12px 24px;
+    }
+    .header img { height: 65px; }
+
+    .container { padding: 0 16px; margin: 20px auto; }
+
+    .card { padding: 18px; margin-bottom: 14px; }
+    .card-title { font-size: 10px; margin-bottom: 13px; }
+
+    .field-row { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .field-row.two { grid-template-columns: 1fr 1fr; }
+    .field input, .field select { font-size: 14px; padding: 9px 11px; }
+
+    .summary-grid { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .summary-box { padding: 14px; }
+    .summary-box .s-val { font-size: 16px; }
+
+    .inst-grid { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .inst-card { padding: 12px; }
+    .inst-card input { font-size: 16px; padding: 9px 11px; }
+    .inst-card .date-display { font-size: 16px; padding: 9px 11px; }
+
+    .btn { font-size: 14px; padding: 10px 22px; min-width: 140px; }
+  }
+
+  /* DESKTOP */
+  @media (min-width: 1024px) {
+    .header {
+      padding: 12px 32px;
+    }
+    .header img { height: 70px; }
+
+    .container { padding: 0 16px; margin: 24px auto; }
+
+    .card { padding: 20px; margin-bottom: 16px; }
+    .card-title { font-size: 11px; margin-bottom: 14px; }
+
+    .field-row { gap: 12px; margin-bottom: 12px; }
+    .field label { font-size: 12px; }
+    .field input, .field select { font-size: 14px; padding: 9px 11px; }
+
+    .summary-grid { gap: 10px; margin-bottom: 16px; }
+    .summary-box { padding: 14px; }
+    .summary-box .s-label { font-size: 10px; }
+    .summary-box .s-val { font-size: 16px; }
+    .summary-box.highlight .s-val { font-size: 20px; }
+
+    .inst-grid { gap: 10px; }
+    .inst-card { padding: 12px; }
+    .inst-card label { font-size: 11px; }
+    .inst-card input { font-size: 16px; padding: 9px 11px; }
+    .inst-card .date-display { font-size: 16px; padding: 9px 11px; }
+
+    .btn { font-size: 14px; padding: 10px 22px; }
+  }
+
+  /* PRINT */
+  @media print {
+    body { background: #fff; margin: 0; padding: 0; }
+    html { margin: 0; padding: 0; }
+    .no-print { display: none !important; }
+    
+    .container { margin: 0; padding: 0; max-width: 100%; }
+    .card { border: 1px solid #ddd; border-radius: 6px; page-break-inside: avoid; margin-bottom: 10px; padding: 14px; }
+    .inst-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .btn-row { display: none; }
+    
+    .header { 
+      -webkit-print-color-adjust: exact; 
+      print-color-adjust: exact;
+      padding: 8px 16px;
+      margin: 0;
+      border: none;
+    }
+    .header img { height: 50px; }
+    
+    .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .summary-box { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #f5f0ff !important; border: 1px solid #d9c7f5 !important; }
+    .summary-box .s-label { color: #7c3aed !important; }
+    .summary-box .s-val { font-size: 16px !important; color: #3b0080 !important; }
+    .summary-box.highlight { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: linear-gradient(135deg, #fff4e6 0%, #ffe6cc 100%) !important; border: 2px solid #ff9800 !important; }
+    .summary-box.highlight .s-label { color: #e65100 !important; }
+    .summary-box.highlight .s-val { font-size: 20px !important; color: #ff6f00 !important; }
+    
+    .inst-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .inst-note { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card-title { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    
+    input[type="date"] { display: none; }
+    input[type="number"] { border: none; padding: 0; background: transparent; }
+    .date-display { display: block !important; }
+    
+    .footer-note { display: none; }
+    
+    @page { 
+      size: A4; 
+      margin: 10mm;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img id="logoImg" src="logo.png" alt="Bansal Classes Private Limited">
+</div>
+
+<div class="container">
+
+  <!-- Student Details -->
+  <div class="card">
+    <div class="card-title">Student Details</div>
+    <div class="field-row three">
+      <div class="field"><label>Student Name</label><input type="text" id="studentName" placeholder="Full Name"></div>
+      <div class="field"><label>Standard / Class</label><input type="text" id="std" placeholder="e.g. 11th Science"></div>
+      <div class="field"><label>Admission Date</label><input type="date" id="startDate" oninput="calculate()"></div>
+    </div>
+  </div>
+
+  <!-- Fee Details -->
+  <div class="card">
+    <div class="card-title">Fee Details</div>
+    <div class="field-row two">
+      <div class="field"><label>Course Fee (₹)</label><input type="number" id="courseFee" placeholder="e.g. 50000" oninput="calculate()"></div>
+      <div class="field"><label>GST (%)</label><input type="number" id="gst" placeholder="e.g. 18" value="18" step="0.1" oninput="calculate()"></div>
+    </div>
+    <div class="field-row two">
+      <div class="field"><label>Registration Fee (₹)</label><input type="number" id="regFee" placeholder="e.g. 1000" value="0" oninput="calculate()"></div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-grid">
+    <div class="summary-box"><div class="s-label">Course Fee</div><div class="s-val" id="sCourse">—</div></div>
+    <div class="summary-box"><div class="s-label">GST Amount</div><div class="s-val" id="sGst">—</div></div>
+    <div class="summary-box highlight"><div class="s-label">Payable Fee (Total)</div><div class="s-val" id="sTotal">—</div></div>
+  </div>
+
+  <!-- Installments -->
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+      <div class="card-title" style="margin-bottom:0">Installment Schedule</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;no-print">
+        <button class="btn no-print" id="pctBtn" onclick="togglePctEditor()" style="font-size:11px;padding:6px 10px;">Edit % Split</button>
+        <button class="btn no-print" id="add4Btn" onclick="add4thInstallment()" style="font-size:11px;padding:6px 10px;display:none;">+ Add 4th Installment</button>
+        <button class="btn no-print" id="remove4Btn" onclick="remove4thInstallment()" style="font-size:11px;padding:6px 10px;display:none;">Remove 4th</button>
+      </div>
+    </div>
+    <!-- Percentage Editor (hidden by default) -->
+    <div id="pctEditor" class="no-print" style="display:none;background:#f5f0ff;border:1px solid #d9c7f5;border-radius:6px;padding:10px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#5b0ea6;margin-bottom:10px;">Set % split for installments (must total 100%)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="pctInputs"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center;">
+        <button class="btn primary" onclick="applyPctSplit()" style="font-size:11px;padding:6px 12px;">Apply Split</button>
+        <span id="pctTotal" style="font-size:11px;color:#888;"></span>
+      </div>
+    </div>
+    <div class="inst-grid" id="instGrid"></div>
+  </div>
+
+  <div class="btn-row no-print">
+    <button class="btn" onclick="resetForm()">Reset</button>
+    <button class="btn primary" onclick="window.print()">⬇ Download as PDF</button>
+  </div>
+
+</div>
+
+<script>
+  const fmt = n => '₹' + Number(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const fmtN = n => Number(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const names = ['1st Installment','2nd Installment','3rd Installment','4th Installment'];
+
+  function fmtDate(s) {
+    if (!s) return '—';
+    const [y,m,d] = s.split('-');
+    return new Date(+y,+m-1,+d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  }
+
+  function getTotalFee() {
+    const course = parseFloat(document.getElementById('courseFee').value)||0;
+    const gstPct = parseFloat(document.getElementById('gst').value)||0;
+    const reg = parseFloat(document.getElementById('regFee').value)||0;
+    const gstAmt = course * gstPct / 100;
+    const total = course + gstAmt - reg;
+    return { course, gstPct, gstAmt, reg, total };
+  }
+
+  function calculate() {
+    const { course, gstAmt, reg, total } = getTotalFee();
+    const startISO = document.getElementById('startDate').value;
+
+    document.getElementById('sCourse').textContent = course>0 ? fmt(course) : '—';
+    document.getElementById('sGst').textContent = gstAmt>0 ? fmt(gstAmt) : '—';
+    document.getElementById('sTotal').textContent = total>0 ? fmt(total) : '—';
+
+    const grid = document.getElementById('instGrid');
+    const prevDates = [], prevAmts = [];
+    for (let i=0;i<4;i++) {
+      prevDates[i] = document.getElementById('iDate_'+i)?.value || '';
+      prevAmts[i] = document.getElementById('iAmt_'+i)?.value || '';
+    }
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = '1fr';
+    
+    if (window.innerWidth >= 768) {
+      grid.style.gridTemplateColumns = instCount === 3 ? '1fr 1fr 1fr' : '1fr 1fr 1fr 1fr';
+    }
+
+    for (let i=0;i<instCount;i++) {
+      let defDate = '';
+      if (startISO) {
+        const [y,m,d] = startISO.split('-');
+        const dt = new Date(+y,+m-1,+d); dt.setMonth(dt.getMonth()+i);
+        defDate = dt.toISOString().slice(0,10);
+      }
+      const dateVal = prevDates[i] || defDate;
+      const instAmt = total > 0 ? total * pctValues[i] / 100 : 0;
+      const amtVal = prevAmts[i] || (instAmt>0 ? instAmt.toFixed(2) : '');
+      const c = document.createElement('div');
+      c.className = 'inst-card';
+      let noteHTML = '';
+      if (i === 0) {
+        noteHTML = '<div class="inst-note">📌 Including Learning Kit ₹7,000</div>';
+      }
+      c.innerHTML = `
+        <div class="inst-name">${names[i]}</div>
+        ${noteHTML}
+        <label>Amount (₹)</label>
+        <input type="number" id="iAmt_${i}" value="${amtVal}" step="0.01" oninput="updateDateDisplay(${i})">
+        <label style="margin-top:6px;">Due Date</label>
+        <input type="date" id="iDate_${i}" value="${dateVal}" oninput="updateDateDisplay(${i})">
+        <div class="date-display" id="dateDisplay_${i}" style="display:none;">${fmtDate(dateVal)}</div>
+      `;
+      grid.appendChild(c);
+    }
+    if (showPct) buildPctInputs();
+    updateButtonVisibility();
+  }
+
+  function updateDateDisplay(index) {
+    const dateInput = document.getElementById('iDate_' + index);
+    const dateDisplay = document.getElementById('dateDisplay_' + index);
+    if (dateInput && dateDisplay) {
+      dateDisplay.textContent = fmtDate(dateInput.value);
+    }
+  }
+
+  function updateButtonVisibility() {
+    document.getElementById('add4Btn').style.display = instCount < 4 ? 'block' : 'none';
+    document.getElementById('remove4Btn').style.display = instCount > 3 ? 'block' : 'none';
+  }
+
+  function resetForm() {
+    ['courseFee','gst','regFee','studentName','std','startDate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (id==='gst') el.value='18';
+      else if (id==='regFee') el.value='0';
+      else el.value='';
+    });
+    instCount = 3;
+    pctValues = [46, 37, 17];
+    document.getElementById('pctEditor').style.display = 'none';
+    showPct = false;
+    calculate();
+  }
+
+  let instCount = 3;
+  let showPct = false;
+  let pctValues = [46, 37, 17];
+
+  function togglePctEditor() {
+    showPct = !showPct;
+    document.getElementById('pctEditor').style.display = showPct ? 'block' : 'none';
+    if (showPct) buildPctInputs();
+  }
+
+  function buildPctInputs() {
+    const container = document.getElementById('pctInputs');
+    container.innerHTML = '';
+    for (let i = 0; i < instCount; i++) {
+      const div = document.createElement('div');
+      div.innerHTML = '<label style="font-size:10px;color:#888;display:block;margin-bottom:2px;">' + names[i] + ' (%)</label>' +
+        '<input type="number" id="pct_' + i + '" value="' + pctValues[i] + '" step="0.1" min="0" max="100" ' +
+        'style="font-size:13px;padding:6px 8px;border:1px solid #ddd;border-radius:6px;width:100%;" oninput="updatePctTotal()">';
+      container.appendChild(div);
+    }
+    updatePctTotal();
+  }
+
+  function updatePctTotal() {
+    let total = 0;
+    for (let i = 0; i < instCount; i++) {
+      total += parseFloat(document.getElementById('pct_' + i)?.value) || 0;
+    }
+    const span = document.getElementById('pctTotal');
+    span.textContent = 'Total: ' + total.toFixed(1) + '%';
+    span.style.color = Math.abs(total - 100) < 0.01 ? '#2d7a2d' : '#c0392b';
+  }
+
+  function applyPctSplit() {
+    let total = 0;
+    const newPcts = [];
+    for (let i = 0; i < instCount; i++) {
+      const v = parseFloat(document.getElementById('pct_' + i)?.value) || 0;
+      newPcts.push(v);
+      total += v;
+    }
+    if (Math.abs(total - 100) > 0.1) {
+      alert('Percentages must total 100%. Current total: ' + total.toFixed(1) + '%');
+      return;
+    }
+    pctValues = newPcts;
+    const { total: feeTotal } = getTotalFee();
+    for (let i = 0; i < instCount; i++) {
+      const el = document.getElementById('iAmt_' + i);
+      if (el && feeTotal > 0) el.value = (feeTotal * pctValues[i] / 100).toFixed(2);
+    }
+    showPct = false;
+    document.getElementById('pctEditor').style.display = 'none';
+    calculate();
+  }
+
+  function add4thInstallment() {
+    if (instCount < 4) {
+      instCount = 4;
+      pctValues.push(0);
+      calculate();
+    }
+  }
+
+  function remove4thInstallment() {
+    if (instCount > 3) {
+      instCount = 3;
+      pctValues = pctValues.slice(0, 3);
+      calculate();
+    }
+  }
+
+  // Handle window resize for responsive grid
+  window.addEventListener('resize', function() {
+    const grid = document.getElementById('instGrid');
+    if (window.innerWidth >= 768) {
+      grid.style.gridTemplateColumns = instCount === 3 ? '1fr 1fr 1fr' : '1fr 1fr 1fr 1fr';
+    } else {
+      grid.style.gridTemplateColumns = '1fr';
+    }
+  });
+
+  // Init
+  document.getElementById('startDate').value = new Date().toISOString().slice(0,10);
+  calculate();
+</script>
+
+<script>document.getElementById("logoImg").src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAACgnVVRSRAAABZAAAAChiVVRSRAAABZAAAAChY3BydAAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAGwB+MDASIAAhEBAxEB/8QAHQABAAEEAwEAAAAAAAAAAAAAAAgBBgcJAgQFA//EAGwQAAEDAwMEAwUQDAoGBwYEBwEAAgMEBQYHEQgSITFBUWETGCJxgRQWMjdVVpGTlJahsbLR0tMVFyM6QlJTVHJ0dbMJM1dic4KSorTBJDQ4Q3bCJTVGY6Ph8CdEg8PU8SZFZITE4oWkOWW1/8QAGwEBAAIDAQEAAAAAAAAAAAAAAAQFAgMGAQf/xAA8EQACAgEBBQYFAwIGAwADAQEAAQIDBBEFEiExUhMUFUFRkQYiMmFxMzSBNbEWI0JTofAkwdElcuHxYv/aAAwDAQACEQMRAD8AmWiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAIiIAiIgCIiAI";</parameter>
+</invoke>
